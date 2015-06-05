@@ -1,0 +1,17 @@
+Package: python-cffi
+Version: 0.7.2-2mdv1
+Architecture: i386
+Maintainer: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
+Installed-Size: 324
+Depends: python (<< 2.8), python-pycparser, python (>= 2.6.6-3), libc6 (>= 2.4), libffi5 (>= 3.0.4)
+Suggests: python-dev
+Section: python
+Priority: optional
+Homepage: http://cffi.readthedocs.org/
+Description: Foreign Function Interface for Python calling C code
+ Convenient and reliable way of calling C code from Python.
+ .
+ The aim of this project is to provide a convenient and reliable way of calling
+ C code from Python. It keeps Python logic in Python, and minimises the C
+ required. It is able to work at either the C API or ABI level, unlike most
+ other approaches, that only support the ABI level.

@@ -1,0 +1,126 @@
+#!/bin/sh
+VERSION=3
+. /usr/share/univention-join/joinscripthelper.lib
+joinscript_init
+
+eval "$(ucr shell)"
+
+### Include mmc schema ###
+export UNIVENTION_APP_IDENTIFIER="pulse-0.1"
+. /usr/share/univention-lib/ldap.sh
+ucs_registerLDAPExtension "$@" \
+	  --schema /usr/share/doc/mmc/contrib/base/mmc.schema || true
+  
+### Create NFS Shares ###
+
+# Get LDAP Server Name
+HOST=`hostname -f`
+BASEDN=`ucr get ldap/base`
+
+udm shares/share create $@ \
+    --position "cn=shares,${BASEDN}" \
+    --set name=computers \
+    --set host=${HOST} \
+    --set path=/var/lib/pulse2/imaging/computers \
+    --set sync=async \
+    --set subtree_checking=0 \
+    --set root_squash=0 \
+    --option nfs \
+    --ignore_exists
+
+udm shares/share create $@ \
+    --position "cn=shares,${BASEDN}" \
+    --set name=masters \
+    --set host=${HOST} \
+    --set path=/var/lib/pulse2/imaging/masters \
+    --set sync=async \
+    --set subtree_checking=0 \
+    --set root_squash=0 \
+    --option nfs \
+    --ignore_exists
+
+# Remove this share who can have been added in previous installation
+# Samba can be missing, so remove...
+udm shares/share remove $@ \
+    --dn "cn=postinst,cn=shares,${BASEDN}" \
+    --remove_referring
+
+# And re-create...
+udm shares/share create $@ \
+    --position "cn=shares,${BASEDN}" \
+    --set name=postinst \
+    --set host=${HOST} \
+    --set path=/var/lib/pulse2/imaging/postinst \
+    --set sync=async \
+    --set subtree_checking=0 \
+    --set root_squash=0 \
+    --ignore_exists
+
+udm shares/share create $@ \
+    --position "cn=shares,${BASEDN}" \
+    --set name=iso \
+    --set host=${HOST} \
+    --set path=/var/lib/pulse2/imaging/isos \
+    --option samba \
+    --ignore_exists
+
+udm shares/share create $@ \
+    --position "cn=shares,${BASEDN}" \
+    --set name=packages \
+    --set host=${HOST} \
+    --set path=/var/lib/pulse2/imaging/package-server-tmpdir \
+    --option samba \
+    --ignore_exists
+
+. /usr/share/univention-lib/all.sh
+if [ ! -s /etc/mandriva.secret ]; then
+  pwgen -1cns 16 > /etc/mandriva.secret
+fi
+chmod 600 /etc/mandriva.secret
+password="$(cat /etc/mandriva.secret)"
+udm users/user create "$@" \
+    --position "cn=users,${BASEDN}" \
+    --set username=mandriva \
+    --set lastname=mandriva \
+    --set password="$password" \
+    --set overridePWLength=1 \
+    --set overridePWHistory=1 \
+    --set objectFlag=hidden \
+    --ignore_exists
+udm users/user modify "$@" \
+    --dn "uid=mandriva,cn=users,${BASEDN}" \
+    --set overridePWLength=1 \
+    --set overridePWHistory=1 \
+    --set password="$password"
+
+ucs_registerLDAPExtension "$@" --acl /var/lib/univention-pulse/67mandriva.acl
+
+export LDAP_PASSWD="$password"
+export LDAP_BINDDN="uid=mandriva,cn=users,${BASEDN}"
+
+SCRIPT_DIR='/var/lib/univention-pulse/'
+if [ ! -f /var/lib/pulse2/pulse_installed.mandriva ]; then
+  run-parts ${SCRIPT_DIR}/config/MMC --arg=${SCRIPT_DIR}
+  run-parts ${SCRIPT_DIR}/config/PULSE2 --arg=${SCRIPT_DIR}
+  run-parts ${SCRIPT_DIR}/config/BACKUPPC
+  run-parts ${SCRIPT_DIR}/config/linbox-config/glpi
+  run-parts ${SCRIPT_DIR}/config/linbox-config/pulse2 --arg=${SCRIPT_DIR}
+  touch /var/lib/pulse2/pulse_installed.mandriva
+fi
+
+patch -p3 -N --dry-run --silent /usr/lib/pymodules/python2.6/mmc/database/database_helper.py -i ${SCRIPT_DIR}/patches/database_helper.diff
+if [ $? -eq 0 ]; then
+  patch -p3 /usr/lib/pymodules/python2.6/mmc/database/database_helper.py -i ${SCRIPT_DIR}/patches/database_helper.diff
+fi
+
+patch -p3 -N --dry-run --silent /usr/share/pyshared/mmc/database/database_helper.py -i ${SCRIPT_DIR}/patches/database_helper.diff
+if [ $? -eq 0 ]; then
+  patch -p3 /usr/share/pyshared/mmc/database/database_helper.py -i ${SCRIPT_DIR}/patches/database_helper.diff
+fi
+/etc/init.d/mmc-agent restart
+
+cp ${SCRIPT_DIR}/addons/index.php /usr/share/pulse2-homepage/index.php
+rm /usr/share/mmc/modules/update/includes/panels/remotesupport.inc.php
+
+joinscript_save_current_version
+exit 0

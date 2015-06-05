@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Defaut redirect to MMC homepage
+#sed -i 's!\(^.*<Directory /var/www/>.*\)$!\tRedirectMatch ^/$ /pulse2-homepage/\n\1!' ${target}/etc/apache2/sites-available/default ${target}/etc/apache2/sites-available/default-ssl

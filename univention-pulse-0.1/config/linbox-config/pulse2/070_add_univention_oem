@@ -1,0 +1,2 @@
+#!/bin/sh
+echo pulse-univention > /etc/pulse-licensing/oem

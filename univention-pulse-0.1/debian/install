@@ -1,0 +1,7 @@
+join_scripts/50pulse-univention.inst	usr/lib/univention-install
+join_scripts/50pulse-univention.uinst	usr/lib/univention-uninstall
+ldap_acl/67mandriva.acl			var/lib/univention-pulse
+addons					var/lib/univention-pulse
+config					var/lib/univention-pulse
+debconf					var/lib/univention-pulse
+patches					var/lib/univention-pulse

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Script
+cat << EOF > /usr/local/bin/bppcstartbackup
+#!/bin/bash
+if [ -z "\$1" ];then
+    echo "Usage: bppcstartbackup servername"
+else
+    su - backuppc -c "/usr/share/backuppc/bin/BackupPC_serverMesg backup \$1 \$1 backuppc 1"
+fi
+EOF
+
+chmod 755 /usr/local/bin/bppcstartbackup

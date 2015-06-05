@@ -1,0 +1,24 @@
+Source: univention-pulse
+Section: unknown
+Priority: optional
+Maintainer: Jean-Christophe VASSORT <jcvassort@mandriva.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+Homepage: http://www.mandriva.com/en/products-services/pulse2/
+#Vcs-Git: git://git.debian.org/collab-maint/univention-pulse.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/univention-pulse.git;a=summary
+
+Package: univention-pulse
+Architecture: all
+Depends: curl (>= 7.21), nsis(>= 2.46), python-sqlalchemy (>= 0.7.2),
+	mmc-agent, mmc-web-base, python-mmc-base, mmc-web-dashboard, python-mmc-dashboard,
+	atftpd, openbsd-inetd, pulse2, dnsutils, python-lxml, python-mmc-report, mmc-web-report, python-mmc-update, mmc-web-update, pulse2-dlp-server, pulse-update-manager, pulse-licensed, pulse-report, python-mmc-support, mmc-web-support, pulse-first-run, ttf-arphic-bkai00mp (>= 2.10), ttf-arphic-bsmi00lp (>= 2.10), ttf-arphic-gbsn00lp (>= 2.11),  fonts-ipaexfont, python-importlib, python-pycparser,
+	apache2-mpm-prefork, libapache2-mod-php5,
+	php5, php5-cli, php5-common, php5-ldap,
+	mysql-server, mysql-client, expect,
+	backuppc (>= 3.1.0-9.2), libfile-rsyncp-perl, libio-dirent-perl, samba-common-bin, python-mmc-backuppc, mmc-web-backuppc, pulse2-uuid-resolver,
+	glpi, fusioninventory-for-glpi, glpi-webservices, glpi-manufacturersimports,
+	python-mmc-glpi, mmc-web-glpi,
+	patch, sudo, pwgen,
+	${misc:Depends}
+Description: Mandriva Pulse meta-package for Univention

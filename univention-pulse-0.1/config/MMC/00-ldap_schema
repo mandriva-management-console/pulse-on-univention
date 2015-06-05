@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Set default password.
+# It's really important because it will be used as "global" default password for linbox-config
+ldap_secret=`cat /etc/mandriva.secret`
+sed -i "s|^\(password[[:space:]]*=[[:space:]]*\).*$|\1${ldap_secret}|" /etc/mmc/plugins/base.ini
+
+# Create default archive path
+mkdir -p /home/archives

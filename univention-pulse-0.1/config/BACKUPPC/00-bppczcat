@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Create BackupPC_zcat shortcut
+ln -sf /usr/share/backuppc/bin/BackupPC_zcat /usr/local/bin/bppczcat

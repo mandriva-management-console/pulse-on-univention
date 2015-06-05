@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Script
+cat << EOF > /root/low-io-priorirty-for-backuppc-process.sh
+#!/bin/bash
+
+for pid in \`ps aux | grep ^backuppc | awk '{ print \$2 }'\`; do ionice -c 3 -p \$pid; renice -n 19 -p \$pid >/dev/null; done
+EOF
+
+chmod 755 /root/low-io-priorirty-for-backuppc-process.sh
+
+# Cron
+cat << EOF > /etc/cron.d/local-backuppc-priority
+# Set very low priority and io priority to backuppc's processes
+# Start at *h05, right after backuppc
+05 *     * * *     root   /root/low-io-priorirty-for-backuppc-process.sh
+EOF

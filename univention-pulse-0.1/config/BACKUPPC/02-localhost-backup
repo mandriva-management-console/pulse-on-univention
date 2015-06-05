@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Default config for localhost
+cat << EOF > /etc/backuppc/localhost.pl
+\$Conf{XferMethod} = 'rsync';
+\$Conf{RsyncClientCmd} = '/usr/bin/env LANG=en /usr/bin/nice -n 19 /usr/bin/ionice -c 3 /usr/bin/sudo \$rsyncPath \$argList+';
+\$Conf{RsyncClientRestoreCmd} = '/usr/bin/env LANG=en /usr/bin/sudo \$rsyncPath \$argList+';
+EOF
+
+# Default backup shares
+cat << EOF >> /etc/backuppc/localhost.pl
+
+\$Conf{RsyncShareName} = [ '/etc', '/root' ];
+EOF
+
+# Add sudo configuration to run backup as root
+echo -e "backuppc\tALL=(root) NOPASSWD:/usr/bin/rsync" > /etc/sudoers.d/local-backuppc
+chown root:root /etc/sudoers.d/local-backuppc
+chmod 0440 /etc/sudoers.d/local-backuppc

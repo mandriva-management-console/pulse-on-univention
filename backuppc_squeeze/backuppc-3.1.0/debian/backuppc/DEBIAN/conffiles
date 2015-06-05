@@ -1,0 +1,5 @@
+/etc/backuppc/apache.conf
+/etc/backuppc/hosts
+/etc/backuppc/config.pl
+/etc/backuppc/localhost.pl
+/etc/init.d/backuppc

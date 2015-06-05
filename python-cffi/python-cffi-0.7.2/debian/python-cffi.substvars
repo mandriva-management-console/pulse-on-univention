@@ -1,0 +1,5 @@
+python:Versions=2.6, 2.7
+python:Provides=python2.6-cffi, python2.7-cffi
+python:Depends=python (<< 2.8), python-pycparser, python (>= 2.6~), python (>= 2.6.6-3)
+shlibs:Depends=libc6 (>= 2.3.6-6~), libc6 (>= 2.4), libffi5 (>= 3.0.4)
+misc:Depends=

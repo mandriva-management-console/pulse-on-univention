@@ -1,0 +1,5 @@
+#!/bin/bash
+
+SCRIPT_DIR=${1}
+cp ${SCRIPT_DIR}/addons/create-glpi-groups-in-mmc.py /root/
+chmod 755 /root/create-glpi-groups-in-mmc.py

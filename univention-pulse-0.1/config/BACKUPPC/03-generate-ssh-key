@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Will be done for LRS/PULSE2 in ssh keys stuff script
+cp -r /root/.ssh /var/lib/backuppc/
+chown -R backuppc:backuppc /var/lib/backuppc/.ssh

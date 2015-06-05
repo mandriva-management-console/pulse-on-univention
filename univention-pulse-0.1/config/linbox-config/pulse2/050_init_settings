@@ -1,0 +1,21 @@
+#!/bin/bash
+
+ldappasswd=`cat /etc/mandriva.secret`
+
+# Do not enable wol as default
+#sed -i 's!^#\?[[:space:]]*\(web_def_awake[[:space:]]*=\).*$!\10!' /etc/mmc/plugins/msc.ini
+
+# Package upload dir
+sed -i 's!^\(tmp_input_dir[[:space:]]*=\).*$!\1 /var/lib/pulse2/package-server-tmpdir!' /etc/mmc/pulse2/package-server/package-server.ini
+
+
+# Bind to Univention LDAP
+sed -i 's!^\(baseUsersDN[[:space:]]*=[[:space:]]*\)ou\(=Users,[[:space:]]*%(baseDN)s$\)!\1cn\2!' /etc/mmc/plugins/base.ini.local
+sed -i 's!^\(baseGroupsDN[[:space:]]*=[[:space:]]*\)ou\(=Groups,[[:space:]]*%(baseDN)s$\)!\1cn\2!' /etc/mmc/plugins/base.ini.local
+
+# Set Univention Administrator ACLs
+python /var/lib/univention-pulse/addons/set_univention_administrator_acls.py
+
+# Restart
+invoke-rc.d mmc-agent restart
+invoke-rc.d pulse2-package-server restart

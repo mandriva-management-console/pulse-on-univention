@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sed -i 's!^#time!time!' /etc/inetd.conf

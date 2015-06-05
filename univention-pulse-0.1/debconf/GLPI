@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Do not try to create any database at install time
+echo "glpi    glpi/dbconfig-install   boolean false" | debconf-set-selections
+
+# Configure Apache2
+echo "glpi    glpi/webserver  multiselect     apache2" | debconf-set-selections

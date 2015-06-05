@@ -1,0 +1,156 @@
+Description: Fix bitfields on big-endian machines
+Author: Armin Rigo <arigo@tunes.org>
+Bug-Upstream: https://bitbucket.org/cffi/cffi/issue/100/big-endian-regressions
+Origin: upstream, https://bitbucket.org/cffi/cffi/commits/98de7e466ace
+Last-Updated: 2013-09-01
+
+--- a/c/_cffi_backend.c
++++ b/c/_cffi_backend.c
+@@ -3489,6 +3489,7 @@
+ 
+ #define SF_MSVC_BITFIELDS 1
+ #define SF_GCC_ARM_BITFIELDS 2
++#define SF_GCC_BIG_ENDIAN 4
+ 
+ static PyObject *b_complete_struct_or_union(PyObject *self, PyObject *args)
+ {
+@@ -3508,6 +3509,9 @@
+ # else
+     int sflags = 0;
+ # endif
++    int _check_endian = 1;
++    if (*(char *)&_check_endian == 0)
++        sflags |= SF_GCC_BIG_ENDIAN;
+ #endif
+ 
+     if (!PyArg_ParseTuple(args, "O!O!|Onii:complete_struct_or_union",
+@@ -3743,6 +3747,9 @@
+                     field_offset_bytes = boffset / 8 - ftype->ct_size;
+                 }
+ 
++                if (sflags & SF_GCC_BIG_ENDIAN)
++                    bitshift = 8 * ftype->ct_size - fbitsize - bitshift;
++
+                 *previous = _add_field(interned_fields, fname, ftype,
+                                        field_offset_bytes, bitshift, fbitsize);
+                 if (*previous == NULL)
+--- a/c/test_c.py
++++ b/c/test_c.py
+@@ -1527,13 +1527,18 @@
+     d = BStruct.fields
+     assert d[0][1].offset == d[1][1].offset == d[2][1].offset == 0
+     assert d[3][1].offset == sizeof(BLong)
+-    assert d[0][1].bitshift == 0
++    def f(m, r):
++        if sys.byteorder == 'little':
++            return r
++        else:
++            return LONGBITS - m - r
++    assert d[0][1].bitshift == f(1, 0)
+     assert d[0][1].bitsize == 1
+-    assert d[1][1].bitshift == 1
++    assert d[1][1].bitshift == f(2, 1)
+     assert d[1][1].bitsize == 2
+-    assert d[2][1].bitshift == 3
++    assert d[2][1].bitshift == f(3, 3)
+     assert d[2][1].bitsize == 3
+-    assert d[3][1].bitshift == 0
++    assert d[3][1].bitshift == f(LONGBITS - 5, 0)
+     assert d[3][1].bitsize == LONGBITS - 5
+     assert sizeof(BStruct) == 2 * sizeof(BLong)
+     assert alignof(BStruct) == alignof(BLong)
+@@ -2867,7 +2872,7 @@
+                                        ('b1', BInt, 9),
+                                        ('b2', BUInt, 7),
+                                        ('c', BChar, -1)], -1, -1, -1, flag)
+-    if flag % 2 == 0:   # gcc and gcc ARM
++    if flag % 2 == 0:   # gcc, any variant
+         assert typeoffsetof(BStruct, 'c') == (BChar, 3)
+         assert sizeof(BStruct) == 4
+     else:               # msvc
+@@ -2875,6 +2880,31 @@
+         assert sizeof(BStruct) == 12
+     assert alignof(BStruct) == 4
+     #
++    p = newp(new_pointer_type(BStruct), None)
++    p.a = b'A'
++    p.b1 = -201
++    p.b2 = 99
++    p.c = b'\x9D'
++    raw = buffer(p)[:]
++    if sys.byteorder == 'little':
++        if flag == 0 or flag == 2:  # gcc, little endian
++            assert raw == b'A7\xC7\x9D'
++        elif flag == 1: # msvc
++            assert raw == b'A\x00\x00\x007\xC7\x00\x00\x9D\x00\x00\x00'
++        elif flag == 4: # gcc, big endian
++            assert raw == b'A\xE3\x9B\x9D'
++        else:
++            raise AssertionError("bad flag")
++    else:
++        if flag == 0 or flag == 2:  # gcc
++            assert raw == b'A\xC77\x9D'
++        elif flag == 1: # msvc
++            assert raw == b'A\x00\x00\x00\x00\x00\xC77\x9D\x00\x00\x00'
++        elif flag == 4: # gcc, big endian
++            assert raw == b'A\x9B\xE3\x9D'
++        else:
++            raise AssertionError("bad flag")
++    #
+     BStruct = new_struct_type("struct foo2")
+     complete_struct_or_union(BStruct, [('a', BChar, -1),
+                                        ('',  BShort, 9),
+@@ -2886,16 +2916,21 @@
+     elif flag == 1: # msvc
+         assert sizeof(BStruct) == 6
+         assert alignof(BStruct) == 2
+-    else:           # gcc ARM
++    elif flag == 2: # gcc ARM
+         assert sizeof(BStruct) == 6
+         assert alignof(BStruct) == 2
++    elif flag == 4: # gcc, big endian
++        assert sizeof(BStruct) == 5
++        assert alignof(BStruct) == 1
++    else:
++        raise AssertionError("bad flag")
+     #
+     BStruct = new_struct_type("struct foo2")
+     complete_struct_or_union(BStruct, [('a', BChar, -1),
+                                        ('',  BInt, 0),
+                                        ('',  BInt, 0),
+                                        ('c', BChar, -1)], -1, -1, -1, flag)
+-    if flag == 0:   # gcc
++    if flag == 0:    # gcc
+         assert typeoffsetof(BStruct, 'c') == (BChar, 4)
+         assert sizeof(BStruct) == 5
+         assert alignof(BStruct) == 1
+@@ -2903,10 +2938,16 @@
+         assert typeoffsetof(BStruct, 'c') == (BChar, 1)
+         assert sizeof(BStruct) == 2
+         assert alignof(BStruct) == 1
+-    else:            # gcc ARM
++    elif flag == 2:  # gcc ARM
+         assert typeoffsetof(BStruct, 'c') == (BChar, 4)
+         assert sizeof(BStruct) == 8
+         assert alignof(BStruct) == 4
++    elif flag == 4:  # gcc, big endian
++        assert typeoffsetof(BStruct, 'c') == (BChar, 4)
++        assert sizeof(BStruct) == 5
++        assert alignof(BStruct) == 1
++    else:
++        raise AssertionError("bad flag")
+ 
+ 
+ def test_bitfield_as_gcc():
+@@ -2918,6 +2959,11 @@
+ def test_bitfield_as_arm_gcc():
+     _test_bitfield_details(flag=2)
+ 
++def test_bitfield_as_big_endian():
++    if '__pypy__' in sys.builtin_module_names:
++        py.test.skip("no big endian machine supported on pypy for now")
++    _test_bitfield_details(flag=4)
++
+ 
+ def test_version():
+     # this test is here mostly for PyPy

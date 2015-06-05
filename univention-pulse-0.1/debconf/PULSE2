@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "atftpd  atftpd/use_inetd        boolean false" | debconf-set-selections
+echo "atftpd  atftpd/basedir  string  /var/lib/pulse2/imaging" | debconf-set-selections
+echo "atftpd  atftpd/logtofile        boolean false" | debconf-set-selections
+echo "atftpd  atftpd/maxthread        string  1000" | debconf-set-selections

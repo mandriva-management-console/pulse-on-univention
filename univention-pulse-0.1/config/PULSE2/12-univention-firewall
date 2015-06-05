@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Reverse SSH for VNC control
+ucr set security/packetfilter/tcp/8100:8200/all=ACCEPT
+
+# Pulse inventory server
+ucr set security/packetfilter/tcp/9999/all=ACCEPT
+
+# Pulse2 Imaging Server
+ucr set security/packetfilter/tcp/1001/all=ACCEPT
+ucr set security/packetfilter/udp/1001/all=ACCEPT
+
+# Pulse2 Package Server (push/pull)
+ucr set security/packetfilter/tcp/9990/all=ACCEPT
+
+# TFTP (Used for imaging)
+ucr set security/packetfilter/udp/69/all=ACCEPT
+
+/etc/init.d/univention-firewall restart

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+LDAP_PWD=`cat /etc/mandriva.secret`
+LDAP_ADMIN="uid=mandriva,cn=users"
+BASEDN=`ucr get ldap/base`
+UMASTERFQDN=`ucr get ldap/master`
+UMASTERPORT=`ucr get ldap/master/port`
+dbadminpasswd=`cat /etc/mysql.secret`
+dbadminuser="root"
+dbhost="localhost"
+glpipasswd=`cat /etc/glpi/config/config_db.php  | grep 'dbpassword' | cut -f2 -d'=' | sed 's!^[[:space:]]*"!!' | sed 's!";[[:space:]]*$!!'`
+FQDN=`hostname -f`
+
+pulse2-setup --batch \
+    --mysql-host ${dbhost} \
+    --mysql-user ${dbadminuser} \
+    --mysql-passwd ${dbadminpasswd} \
+    --ldap-uri ldap://${UMASTERFQDN}:${UMASTERPORT} \
+    --ldap-basedn "${BASEDN}" \
+    --ldap-admindn "${LDAP_ADMIN}, ${BASEDN}" \
+    --ldap-passwd ${LDAP_PWD} \
+    --glpi-enable True \
+    --glpi-url http://${FQDN}/glpi \
+    --glpi-dbhost localhost \
+    --glpi-dbname glpi \
+    --glpi-dbuser glpi \
+    --glpi-dbpasswd ${glpipasswd} \
+    --glpi-purge-machines \
+    --glpi-webservices-user root \
+    --glpi-webservices-passwd ${LDAP_PWD}
+
+sed -i 's!\(glpi_base_url[[:space:]]*=[[:space:]]*http://\)[.[:alnum:]]*\(.*\)!\1localhost\2!' /etc/mmc/plugins/glpi.ini.local
+# mmc-agent is known to crash after running pulse2-setup
+sleep 2
+invoke-rc.d mmc-agent restart
+
+# Associate imaging server with root entity and generate default menu
+pulse2-load-defaults --link-server --default-menu

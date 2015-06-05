@@ -1,0 +1,17 @@
+#!/bin/bash
+
+SCRIPT_DIR=${1}
+cp ${SCRIPT_DIR}/addons/scripts.tar.gz /root/
+cd /root/; tar xzf scripts.tar.gz; rm scripts.tar.gz
+
+chmod 755 /root/force-inventory-on-machines.sh
+
+chmod 755 /root/install-pulse-agents-on-debian-based-systems.sh
+
+mkdir -p /root/pulse2_boot_services/ubuntu
+mv /root/pulse2_imaging_add_ubuntu.sh /root/pulse2_boot_services/ubuntu/ 
+chmod 755 /root/pulse2_boot_services/ubuntu/pulse2_imaging_add_ubuntu.sh
+
+mkdir -p /root/pulse2_boot_services/debian
+mv /root/install.sh /root/pulse2_boot_services/debian/
+chmod 755 /root/pulse2_boot_services/debian/install.sh

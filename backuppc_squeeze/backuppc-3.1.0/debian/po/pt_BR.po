@@ -1,0 +1,102 @@
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+#    Developers do not need to manually edit POT or PO files.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: backuppc\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-02-13 10:56+0100\n"
+"PO-Revision-Date: 2005-02-26 15:52-0300\n"
+"Last-Translator: André Luís Lopes <andrelop@debian.org>\n"
+"Language-Team: Debian-BR Project <debian-l10n-portuguese@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: note
+#. Description
+#: ../backuppc.templates:3
+msgid "Web administration default user created"
+msgstr "Usuário padrão para administração Web criado"
+
+#. Type: note
+#. Description
+#: ../backuppc.templates:3
+msgid ""
+"BackupPC can be managed through its web interface:\n"
+" http://${site}/backuppc/"
+msgstr ""
+"O BackupPc pode ser gerenciado através de sua interface Web :\n"
+" http://${site}/backuppc/"
+
+#. Type: note
+#. Description
+#: ../backuppc.templates:3
+msgid ""
+"For that purpose, a web user named 'backuppc' with '${pass}' as password has "
+"been created. You can change this password by running 'htpasswd /etc/"
+"backuppc/htpasswd backuppc'."
+msgstr ""
+"Para esse propósito, um usuário web chamado 'backuppc' com a senha '${pass}' "
+"foi criado. Você pode mudar essa senha executando o comando 'htpasswd /etc/"
+"backuppc/htpasswd backuppc'."
+
+#. Type: multiselect
+#. Description
+#: ../backuppc.templates:15
+msgid "Which web server would you like to reconfigure automatically:"
+msgstr ""
+
+#. Type: multiselect
+#. Description
+#: ../backuppc.templates:15
+msgid ""
+"BackupPC supports any web server with CGI enabled, but this automatic "
+"configuration process only supports Apache."
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../backuppc.templates:22
+msgid "Do you want to restart the webservers now if needed?"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../backuppc.templates:22
+msgid ""
+"Remember that in order to activate the new configuration the webservers have "
+"to be restarted."
+msgstr ""
+
+#~ msgid "Add aliases for /backuppc/ to your apache config files ?"
+#~ msgstr ""
+#~ "Adicionar aliases para /backppc/ em seus arquivos de configuração do "
+#~ "Apache ?"
+
+#~ msgid ""
+#~ "In order to have the Backuppc web administration interface working, I "
+#~ "need to add an include line in your apache configuration, which will set-"
+#~ "up  a few aliases."
+#~ msgstr ""
+#~ "Para que a interface de administração Web do BackupPc funcione, é "
+#~ "necessário adicionar uma linha 'Include' em seu arquivo de configuração "
+#~ "do Apache, a qual irá configurar alguns aliases."
+
+#~ msgid ""
+#~ "If you do not trust automatically modified configurations, you can add "
+#~ "the  /etc/backuppc/apache.conf include file later yourself."
+#~ msgstr ""
+#~ "Caso você não confie no procedimento automático, você pode adicionar o "
+#~ "'Include /etc/backuppc/apache.conf' em seu arquivo de configuração do "
+#~ "Apache manualmente posteriormente."

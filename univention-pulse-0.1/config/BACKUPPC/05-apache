@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Allow from 127.0.0.1 + htaccess
+sed -i 's!^\([[:space:]]\+\)Allow from all!\1Order deny,allow\n\1Deny from all\n\1Allow from 127.0.0.1\n\1Satisfy Any!' /etc/backuppc/apache.conf
+
+# Link into apache's conf.d
+ln -sf ../../backuppc/apache.conf /etc/apache2/conf.d/backuppc.conf
+/etc/init.d/apache2 reload

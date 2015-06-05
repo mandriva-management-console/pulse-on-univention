@@ -1,0 +1,91 @@
+Source: python-cffi
+Section: python
+Priority: optional
+Maintainer: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
+Uploaders: Stefano Rivera <stefanor@debian.org>
+Build-Depends:
+ debhelper (>= 9),
+ dh-python,
+ libffi-dev,
+ python-all-dbg,
+ python-all-dev (>= 2.6.6-3~),
+ python-py,
+ python-pycparser,
+ python-pytest,
+ python-setuptools,
+ python-virtualenv,
+ python3-all-dbg,
+ python3-all-dev (>= 3.1.2-6~),
+ python3-py,
+ python3-pycparser,
+ python3-pytest,
+ python3-setuptools
+Standards-Version: 3.9.4
+Homepage: http://cffi.readthedocs.org/
+Vcs-Svn: svn://anonscm.debian.org/python-modules/packages/python-cffi/trunk/
+Vcs-Browser: http://anonscm.debian.org/viewvc/python-modules/packages/python-cffi/trunk/
+X-Python-Version: >= 2.6
+X-Python3-Version: >= 3.1
+XS-Testsuite: autopkgtest
+
+Package: python-cffi
+Architecture: any
+Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
+Suggests: python-dev
+Description: Foreign Function Interface for Python calling C code
+ Convenient and reliable way of calling C code from Python.
+ .
+ The aim of this project is to provide a convenient and reliable way of calling
+ C code from Python. It keeps Python logic in Python, and minimises the C
+ required. It is able to work at either the C API or ABI level, unlike most
+ other approaches, that only support the ABI level.
+
+Package: python-cffi-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends:
+ python-cffi (= ${binary:Version}),
+ ${misc:Depends},
+ ${python:Depends},
+ ${shlibs:Depends}
+Description: Foreign Function Interface for Python calling C code (Debug version)
+ Convenient and reliable way of calling C code from Python.
+ .
+ The aim of this project is to provide a convenient and reliable way of calling
+ C code from Python. It keeps Python logic in Python, and minimises the C
+ required. It is able to work at either the C API or ABI level, unlike most
+ other approaches, that only support the ABI level.
+ .
+ This package contains the debug version of python-cffi.
+
+Package: python3-cffi
+Architecture: any
+Depends: ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends}
+Suggests: python3-dev
+Description: Foreign Function Interface for Python 3 calling C code
+ Convenient and reliable way of calling C code from Python 3.
+ .
+ The aim of this project is to provide a convenient and reliable way of calling
+ C code from Python. It keeps Python logic in Python, and minimises the C
+ required. It is able to work at either the C API or ABI level, unlike most
+ other approaches, that only support the ABI level.
+
+Package: python3-cffi-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends:
+ python3-cffi (= ${binary:Version}),
+ ${misc:Depends},
+ ${python3:Depends},
+ ${shlibs:Depends}
+Description: Foreign Function Interface for Python 3 calling C code (Debug version)
+ Convenient and reliable way of calling C code from Python 3.
+ .
+ The aim of this project is to provide a convenient and reliable way of calling
+ C code from Python. It keeps Python logic in Python, and minimises the C
+ required. It is able to work at either the C API or ABI level, unlike most
+ other approaches, that only support the ABI level.
+ .
+ This package contains the debug version of python-cffi.

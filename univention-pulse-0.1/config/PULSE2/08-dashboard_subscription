@@ -1,0 +1,5 @@
+#!/bin/bash
+
+#cd ${target}/tmp/; wget ftp://${SERVER}//pub/fai/pulse2/pulse2_dashboard_subscription.py
+#${ROOTCMD} python /tmp/pulse2_dashboard_subscription.py
+#rm ${target}/tmp/pulse2_dashboard_subscription.py

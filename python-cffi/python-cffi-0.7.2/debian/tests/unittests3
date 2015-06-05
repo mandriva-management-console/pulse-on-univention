@@ -1,0 +1,19 @@
+#!/bin/sh
+set -efu
+
+pythons="$(py3versions -r)"
+cp -a c testing "$ADTTMP"
+
+# Not appropriate:
+rm "$ADTTMP"/testing/test_version.py
+
+# Delete any stale __pycache__s
+find "$ADTTMP" -name '__pycache__' -print0 | xargs -0 rm -rf
+
+cd "$ADTTMP"
+for py in $pythons; do
+	echo "======= $py ======="
+	$py -m pytest c testing
+	echo "======= $py-dbg ======="
+	$py-dbg -m pytest c testing 2>&1
+done

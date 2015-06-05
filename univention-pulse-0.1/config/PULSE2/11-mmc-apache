@@ -1,0 +1,4 @@
+#!/bin/bash
+
+ln -sf /etc/mmc/apache/mmc.conf /etc/apache2/conf.d/
+/etc/init.d/apache2 reload

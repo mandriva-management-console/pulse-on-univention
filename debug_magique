@@ -1,0 +1,10 @@
+touch /tmp/toto
+tail -f /tmp/toto|bash &>> /tmp/tata
+
+puis dans un autre term:
+cat >> /tmp/toto
+
+Puis encore dans un autre term:
+tail -f /tmp/tata
+
+Pour toute commande entrée via "cat >> /tmp/toto", le résultat apparaîtra dans /tmp/tata

@@ -1,0 +1,29 @@
+commit d32acb480a16f8f0bc47b40ed9f5ccb184f13525
+Author: Jean-Christophe VASSORT <jcvassort@mandriva.com>
+Date:   Fri May 30 12:45:02 2014 +0200
+
+    core: python2.6 compatibility
+    
+    With sqlalchemy squeeze version, database_helper raise a TypeError
+
+diff --git a/core/agent/mmc/database/database_helper.py b/core/agent/mmc/database/database_helper.py
+index 6cf49bb..cee4692 100644
+--- a/core/agent/mmc/database/database_helper.py
++++ b/core/agent/mmc/database/database_helper.py
+@@ -200,12 +200,14 @@ class DatabaseHelper(Singleton):
+             if 'filters' in params:
+                 clauses = [_entity_descriptor(query._mapper_zero(), key) == value
+                     for key, value in params['filters'].iteritems()]
+-                query = query.filter(*clauses)
++                if clauses:
++                    query = query.filter(*clauses)
+             # Like filters
+             if 'like_filters' in params:
+                 clauses = [_entity_descriptor(query._mapper_zero(), key).like('%' + value + '%')
+                     for key, value in params['like_filters'].iteritems()]
+-                query = query.filter(*clauses)
++                if clauses:
++                    query = query.filter(*clauses)
+ 
+             # Calculating count without limit and offset on primary entity id
+             primary_id = _entity_descriptor(query._mapper_zero(), "id")

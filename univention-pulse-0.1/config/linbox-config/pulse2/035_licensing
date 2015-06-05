@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Clean
+test -d /etc/pulse-licensing/ && rm -rf /etc/pulse-licensing/*
+
+# Regen
+dpkg-reconfigure -fnoninteractive pulse-licensed

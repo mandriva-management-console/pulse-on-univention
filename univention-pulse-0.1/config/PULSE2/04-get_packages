@@ -1,0 +1,16 @@
+#!/bin/bash
+
+SCRIPT_DIR=${1}
+cd /tmp/; cp ${SCRIPT_DIR}/addons/get_packages.tar.gz /tmp/; tar xzf get_packages.tar.gz; rm /tmp/get_packages.tar.gz
+/usr/bin/python /tmp/get_packages/getPackage.py
+sevzipexe="`find ${target}/var/lib/pulse2/packages/ -name '7z920.exe'`"
+sevzip64exe="`find ${target}/var/lib/pulse2/packages/ -name '7z920-x64.msi'`"
+sevzipdir=`dirname ${sevzipexe}`
+sevzip64dir=`dirname ${sevzip64exe}`
+mv /tmp/get_packages/7-Zip-extensions.bat ${sevzipdir}
+mv /tmp/get_packages/7-Zip-64-extensions.bat ${sevzip64dir}
+
+# CONFUSING, DROP 7Z 64
+test -d "${sevzip64dir}" && rm -rf "${sevzip64dir}"
+
+rm -r /tmp/get_packages

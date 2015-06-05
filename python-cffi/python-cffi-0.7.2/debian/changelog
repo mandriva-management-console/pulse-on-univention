@@ -1,0 +1,43 @@
+python-cffi (0.7.2-2mdv1) unstable; urgency=medium
+
+  * Increase version for Univention Corporate Server release 4.0
+
+ -- Jean-Christophe VASSORT <jcvassort@mandriva.com>  Wed, 19 Nov 2014 17:36:29 +0100
+
+python-cffi (0.7.2-2) unstable; urgency=low
+
+  * Patch: big-endian-bitfields. Handle bitfields correctly on big endian
+    archs.
+
+ -- Stefano Rivera <stefanor@debian.org>  Sun, 01 Sep 2013 17:41:20 +0200
+
+python-cffi (0.7.2-1) unstable; urgency=low
+
+  [ Stefano Rivera ]
+  * New upstream release.
+    - Supports creating void * handles for Python objects.
+  * Switched watch file to https.
+  * Build with pybuild.
+  * Use -m pytest in autopkgtests.
+
+  [ Jakub Wilk ]
+  * Use canonical URIs for Vcs-* fields.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 09 Aug 2013 16:22:47 +0200
+
+python-cffi (0.6-1) unstable; urgency=low
+
+  * New upstream release.
+    - Fixing most of the build failures.
+  * Drop all patches (superseded upstream).
+  * autopkgtests: Depend on python-dev / python3-dev.
+  * Suggest python-dev / python3-dev (needed for building verifier
+    extensions).
+
+ -- Stefano Rivera <stefanor@debian.org>  Tue, 16 Apr 2013 18:18:19 +0200
+
+python-cffi (0.5-1) unstable; urgency=low
+
+  * Initial package (Closes: #700084)
+
+ -- Stefano Rivera <stefanor@debian.org>  Mon, 25 Feb 2013 12:12:31 +0200

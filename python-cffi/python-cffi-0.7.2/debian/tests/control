@@ -1,0 +1,19 @@
+Tests: unittests
+Depends:
+ python-all-dbg,
+ python-all-dev,
+ python-cffi,
+ python-cffi-dbg,
+ python-py,
+ python-pytest,
+ python-virtualenv
+
+Tests: unittests3
+Depends:
+ python-virtualenv,
+ python3-all-dbg,
+ python3-all-dev,
+ python3-cffi,
+ python3-cffi-dbg,
+ python3-py,
+ python3-pytest

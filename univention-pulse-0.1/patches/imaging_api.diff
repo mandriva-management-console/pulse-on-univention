@@ -1,0 +1,37 @@
+commit 946c076f7fb77da5a55637036a706d1cf8767354
+Author: Ladislav CABELKA <lcabelka@mandriva.com>
+Date:   Fri Jun 20 13:16:48 2014 +0200
+
+    pkg-server: do not pre-select menu if entry not exists
+
+diff --git a/pulse2/services/pulse2/package_server/imaging/pxe/api.py b/pulse2/services/pulse2/package_server/imaging/pxe/api.py
+index 06e4774..c2c1ea1 100644
+--- a/pulse2/services/pulse2/package_server/imaging/pxe/api.py
++++ b/pulse2/services/pulse2/package_server/imaging/pxe/api.py
+@@ -492,6 +492,8 @@ class PXEImagingApi (PXEMethodParser):
+ 
+         @d.addErrback
+         def _eb (failure):
++
++            logging.getLogger().warn("PXE Proxy: preselected-menu-entry-change failed: %s" % str(failure))
+             self.api.logClientAction(mac,
+                                      LOG_LEVEL.WARNING,
+                                      LOG_STATE.MENU,
+@@ -520,6 +522,9 @@ class PXEImagingApi (PXEMethodParser):
+         @return: ACK to confirm a correct reception, otherwise ERROR
+         @rtype: str
+         """
++        if not mac in EntryTracking():
++            return succeed("ACK")
++
+         actual_entry, marked = EntryTracking().get(mac)
+         if marked and actual_entry == int(default_entry):
+             setDefaultMenuItem = True
+@@ -720,6 +725,7 @@ class PXEImagingApi (PXEMethodParser):
+                         self.lasttime = now
+ 
+                 return str(wait)
++
+             except Exception, e :
+                 logging.getLogger().warn("PXE Proxy: method imagingServerStatus failed: %s" % str(e))
+ 

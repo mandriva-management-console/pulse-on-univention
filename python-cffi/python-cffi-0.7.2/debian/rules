@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+
+export PYBUILD_DESTDIR_python2=debian/python-cffi/
+export PYBUILD_DESTDIR_python2-dbg=debian/python-cffi-dbg/
+export PYBUILD_DESTDIR_python3=debian/python3-cffi/
+export PYBUILD_DESTDIR_python3-dbg=debian/python3-cffi-dbg/
+
+%:
+	dh $@ --with python2,python3 --buildsystem pybuild
+
+override_dh_auto_test:
+	PYBUILD_SYSTEM=custom \
+		PYBUILD_TEST_ARGS="{interpreter} -m pytest c/ testing/" \
+		dh_auto_test
+
+override_dh_strip:
+	dh_strip -p python-cffi -p python-cffi-dbg --dbg-package=python-cffi-dbg
+	dh_strip -p python3-cffi -p python3-cffi-dbg --dbg-package=python3-cffi-dbg
+	dh_strip --remaining-packages
+
+override_dh_clean:
+	dh_clean
+	rm -rf $(wildcard testing/snippets/*/build testing/snippets/*/dist testing/snippets/*/*.egg-info)

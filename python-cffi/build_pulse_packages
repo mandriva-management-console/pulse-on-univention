@@ -1,0 +1,93 @@
+#!/bin/bash
+set -e
+
+if ! `which pbuilder > /dev/null`; then 
+    echo "!! please install pbuilder package !!"
+    exit 1
+fi
+
+create_pbuilder_chroot() {
+    if [ ! -f /var/cache/pbuilder/$1-$2.tgz ]; then 
+        sudo pbuilder --create --distribution $1 --architecture $2 --basetgz /var/cache/pbuilder/$1-$2.tgz --mirror http://ftp.fr.debian.org/debian
+    fi
+}
+
+create_pbuilder_chroot wheezy amd64
+create_pbuilder_chroot wheezy i386
+create_pbuilder_chroot squeeze amd64
+create_pbuilder_chroot squeeze i386
+
+git_repo_all='http://zoidberg:Mach4Iep4Gaizoox@buildbot.mandriva.com/buildbot/pkgs/wheezy/pulse2/'
+versions=$(wget -qO - $git_repo_all |bquery 'td a'|tac)
+
+for version in $versions; do
+  version=${version%/}
+  dialog_params="$dialog_params $version \"-\""
+done
+
+version=$(dialog --clear --title "Build from commit" \
+	--menu "Select commit to build from: " 20 51 14 \
+        $dialog_params 3>&1 1>&2 2>&3)
+	
+git_repo_url="http://zoidberg:Mach4Iep4Gaizoox@buildbot.mandriva.com/buildbot/pkgs/wheezy/pulse2/$version"
+echo $git_repo_url
+dsc_file=$(wget --http-user zoidberg --http-password Mach4Iep4Gaizoox -qO - http://buildbot.mandriva.com/buildbot/pkgs/wheezy/pulse2/latest |bquery 'td a'|grep dsc)
+git_version=$(echo $dsc_file|sed 's/^pulse2_//'|sed 's/\.dsc$//')
+
+# Change to a tempdir
+cd $(mktemp -d)
+
+# Asking for new version number (without revision)
+echo 'New version: '
+read new_version
+echo 'Revision: '
+read revision
+
+build() {
+    # Downloading dsc file with dget
+    echo $git_repo_url/$dsc_file ||true
+    dget $git_repo_url/$dsc_file ||true
+    dpkg-source -x $dsc_file||true
+    
+    # Put release version in changelog
+    sed -i "s/$git_version/$new_version-$revision/" pulse2-*/debian/changelog
+    # Change UNRELEASED to unstable
+    sed -i "s/UNRELEASED/unstable/" pulse2-*/debian/changelog
+    #vim pulse2-*/debian/changelog
+    
+    # Rename the tar.gz
+    cp *.orig.tar.gz pulse2_${new_version}.orig.tar.gz
+    
+    # Build the package
+    cd pulse2-*/
+
+    mkdir ../$1
+    sudo pdebuild --use-pdebuild-internal -- --basetgz /var/cache/pbuilder/$1.tgz || true
+    mv ../*deb ../$1/
+    mv ../pulse2_${new_version}-${revision}.dsc ../$1/
+    mv ../pulse2_${new_version}-${revision}.debian.tar.gz ../$1/
+    mv ../pulse2_${new_version}.orig.tar.gz ../$1/
+
+    cd ..
+
+    # clean the working dir
+    sudo rm -rf *git*
+}
+
+build wheezy-amd64
+build wheezy-i386
+build squeeze-amd64
+build squeeze-i386
+
+sudo rm -rf *git* *.build *.changes
+
+# =============================
+# HEISENBERG SIDE
+# =============================
+
+## Move old packages to old
+#stable_repo_dir='/var/www/mandriva.org/pub/pulse2/server/debian/pool-wheezy/2.0/pulse2/'
+#ssh isteam@heisenberg.mandriva.com "cd $stable_repo_dir; mkdir old-$(date +%F); ls|grep -v old|xargs mv -t old-$(date +%F)/"
+#scp * isteam@heisenberg.mandriva.com:$stable_repo_dir/
+## Regen debian repo
+#ssh isteam@heisenberg.mandriva.com "/var/www/mandriva.org/pub/pulse2/server/debian/regen-debian-repo.sh"

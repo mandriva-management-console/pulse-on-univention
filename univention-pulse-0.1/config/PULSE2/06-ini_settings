@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Disable dashboard's shortcuts panel
+sed -i 's!^\(disabled_panels[[:space:]]*=\).*$!\1 shortcuts!' /etc/mmc/plugins/dashboard.ini
+
+# Do not enable wol as default
+#sed -i 's!^#\?[[:space:]]*\(web_def_awake[[:space:]]*=\).*$!\10!' /etc/mmc/plugins/msc.ini
+
+# Package upload dir
+mkdir -p /var/lib/pulse2/package-server-tmpdir
+sed -i 's!^\(tmp_input_dir[[:space:]]*=\).*$!\1 /var/lib/pulse2/package-server-tmpdir!' /etc/mmc/pulse2/package-server/package-server.ini
+
+sed -i 's!^#*[[:space:]]*\(maxperpage[[:space:]]*=[[:space:]]*\).*$!\120!' /etc/mmc/mmc.ini
+sed -i 's!^#*[[:space:]]*\(community[[:space:]]*=[[:space:]]*\).*$!\1no!' /etc/mmc/mmc.ini
