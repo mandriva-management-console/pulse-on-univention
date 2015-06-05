@@ -16,4 +16,8 @@ ucr set security/packetfilter/tcp/9990/all=ACCEPT
 # TFTP (Used for imaging)
 ucr set security/packetfilter/udp/69/all=ACCEPT
 
+# Zabbix
+ucr set security/packetfilter/tcp/10050/all=ACCEPT
+ucr set security/packetfilter/tcp/10051/all=ACCEPT
+
 /etc/init.d/univention-firewall restart

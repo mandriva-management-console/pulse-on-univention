@@ -28,7 +28,7 @@ case "$1" in
         # Clean Windows agents
         /var/lib/pulse2/clients/win32/generate-agent-pack.sh -c
         # Generate all agents
-        /var/lib/pulse2/clients/generate-agents
+        /var/lib/pulse2/clients/generate-agents && /var/lib/pulse2/clients/create-repos.sh
 	# restart all Pulse services
 	for service  in `ls /etc/init.d/pulse2*; ls /etc/init.d/mmc-agent`; do
             $service restart

@@ -52,6 +52,7 @@ echo "update glpi_users set password = MD5('${LDAP_ROOT_PASSWD}') where name = '
 
 # Create root entity for this organization
 echo "INSERT INTO glpi_entities (id,entities_id,level,name,completename) VALUES (1,0,1,'${GLPI_ORGANIZATION}','${GLPI_ORGANIZATION}');" | mysql -uroot glpi -p${ROOT_PASSWD}
+echo "INSERT INTO glpi_locations (id,entities_id,name,completename) VALUES (1,1,'${GLPI_ORGANIZATION}','${GLPI_ORGANIZATION}');" | mysql -uroot glpi -p${ROOT_PASSWD}
 
 # Enable LDAP
 echo "insert into glpi_authldaps values (1,'LocalLDAP','${UMASTERFQDN}','${BASEDN}','${LDAP_ADMIN},${BASEDN}',${UMASTERPORT},'','uid',0,'','(&(objectClass=posixGroup)(cn=GLPI-*))',1,'memberuid','mail','sn','givenname','telephonenumber','','mobile','',0,0,0,'',NULL,'preferredlanguage','','','2012-11-02 17:03:27','',1,1,'${ENCRYPTEDGLPIKEY}','','','','');" | mysql -uroot glpi -p${ROOT_PASSWD}

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Try to get previous password from my.cnf
+if [ -e "/etc/mmc/plugins/monitoring.ini.local" ]; then
+  zabbix_password=`grep -E '^monitoring_password[[:space:]]*=[[:space:]]*.*$' /etc/mmc/plugins/monitoring.ini.local | cut -d'=' -f2 | sed 's/[[:space:]]//g' | head -n 1`
+fi
+# If unknown, use FAI's default password for all services
+[ -z ${zabbix_password} ] && exit 1
+
+zabbix_api_path="/usr/share/doc/mmc/contrib/monitoring/zabbix-templates"
+
+if [ -e "${zabbix_api_path}/zabbix_api.py.gz" ]; then
+    gunzip -f ${zabbix_api_path}/zabbix_api.py.gz
+fi
+
+# Create zabbix autoregistration action
+python ${zabbix_api_path}/zabbix_configuration.py --url http://127.0.0.1/zabbix -p ${zabbix_password} autoregistration -t "Template App Zabbix Agent"
+
+# add templates
+for template in `find ${zabbix_api_path}/templates -type f -name "*.gz"`; do
+    gunzip -f ${template}
+done
+
+for template in `find ${zabbix_api_path}/templates -type f -name "*.xml" | grep -v "contrib/failed"`; do
+    python ${zabbix_api_path}/zabbix_configuration.py --url http://127.0.0.1/zabbix -p ${zabbix_password} template ${template}
+done
+
+# Set Zabbix IP in zabbix agent packages
+LRSIP=$(univention-config-registry get interfaces/eth0/address)
+sed -i "s/##SERVERIP##/$LRSIP/" /var/lib/pulse2/packages/9f0f4a88-974c-11e4-8dc5-0800275891ef/zabbix_agentd.conf

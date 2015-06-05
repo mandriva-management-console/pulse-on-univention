@@ -108,15 +108,6 @@ if [ ! -f /var/lib/pulse2/pulse_installed.mandriva ]; then
   touch /var/lib/pulse2/pulse_installed.mandriva
 fi
 
-patch -p3 -N --dry-run --silent /usr/lib/pymodules/python2.6/mmc/database/database_helper.py -i ${SCRIPT_DIR}/patches/database_helper.diff
-if [ $? -eq 0 ]; then
-  patch -p3 /usr/lib/pymodules/python2.6/mmc/database/database_helper.py -i ${SCRIPT_DIR}/patches/database_helper.diff
-fi
-
-patch -p3 -N --dry-run --silent /usr/share/pyshared/mmc/database/database_helper.py -i ${SCRIPT_DIR}/patches/database_helper.diff
-if [ $? -eq 0 ]; then
-  patch -p3 /usr/share/pyshared/mmc/database/database_helper.py -i ${SCRIPT_DIR}/patches/database_helper.diff
-fi
 /etc/init.d/mmc-agent restart
 
 cp ${SCRIPT_DIR}/addons/index.php /usr/share/pulse2-homepage/index.php

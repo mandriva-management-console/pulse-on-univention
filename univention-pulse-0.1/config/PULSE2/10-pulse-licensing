@@ -1,5 +1,5 @@
 #!/bin/bash
 
 SCRIPT_DIR=${1}
-cp ${SCRIPT_DIR}/addons/inventory.py /usr/lib/pymodules/python2.6/mmc/plugins/pulse2/
-chmod 644 /usr/lib/pymodules/python2.6/mmc/plugins/pulse2/inventory.py
+cp ${SCRIPT_DIR}/addons/inventory.py /usr/lib/pymodules/python2.7/mmc/plugins/pulse2/
+chmod 644 /usr/lib/pymodules/python2.7/mmc/plugins/pulse2/inventory.py

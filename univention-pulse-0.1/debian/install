@@ -5,3 +5,4 @@ addons					var/lib/univention-pulse
 config					var/lib/univention-pulse
 debconf					var/lib/univention-pulse
 patches					var/lib/univention-pulse
+packages				var/lib/pulse2

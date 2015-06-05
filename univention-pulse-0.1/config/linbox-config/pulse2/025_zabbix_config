@@ -1,0 +1,176 @@
+#!/bin/bash
+
+ROOT_PASSWD=$(cat /etc/mysql.secret)
+
+echo "zabbix-server-mysql zabbix-server-mysql/mysql/app-pass  password $ROOT_PASSWD" | debconf-set-selections   
+echo "zabbix-server-mysql zabbix-server-mysql/password-confirm    password $ROOT_PASSWD" | debconf-set-selections
+echo "zabbix-server-mysql zabbix-server-mysql/mysql/admin-pass    password $ROOT_PASSWD" | debconf-set-selections  
+echo "zabbix-server-mysql zabbix-server-mysql/app-password-confirm    password $ROOT_PASSWD" | debconf-set-selections      
+#echo "zabbix-server-mysql zabbix-server-mysql/upgrade-error   select  abort" | debconf-set-selections  
+#echo "zabbix-agent    zabbix-agent/server string  127.0.0.1" | debconf-set-selections  
+echo "zabbix-server-mysql zabbix-server-mysql/dbconfig-reinstall  boolean true" | debconf-set-selections  
+#echo "zabbix-server-mysql zabbix-server-mysql/upgrade-backup  boolean true" | debconf-set-selections  
+#echo "zabbix-frontend-php zabbix-frontend-php/configure-apache    boolean true" | debconf-set-selections  
+#echo "zabbix-server-mysql zabbix-server-mysql/missing-db-package-error    select  abort" | debconf-set-selections  
+echo "zabbix-server-mysql zabbix-server-mysql/mysql/admin-user    string  root" | debconf-set-selections  
+#echo "zabbix-server-mysql zabbix-server-mysql/remote/port string" | debconf-set-selections  
+#echo "zabbix-server-mysql zabbix-server-mysql/remote/host select" | debconf-set-selections   
+echo "zabbix-server-mysql zabbix-server-mysql/db/dbname   string  zabbix" | debconf-set-selections  
+#echo "zabbix-server-mysql zabbix-server-mysql/dbconfig-remove boolean" | debconf-set-selections   
+echo "zabbix-server-mysql zabbix-server-mysql/db/app-user string  zabbix" | debconf-set-selections  
+echo "zabbix-server-mysql zabbix-server-mysql/database-type   select  mysql" | debconf-set-selections  
+echo "zabbix-server-mysql zabbix-server-mysql/internal/skip-preseed   boolean false" | debconf-set-selections  
+echo "zabbix-server-mysql zabbix-server-mysql/remove-error    select  abort" | debconf-set-selections  
+#echo "zabbix-server-mysql zabbix-server-mysql/server  note" | debconf-set-selections      
+#echo "zabbix-server-mysql zabbix-server-mysql/remote/newhost  string" | debconf-set-selections    
+#echo "zabbix-frontend-php zabbix-frontend-php/restart-webserver   boolean true" | debconf-set-selections  
+#echo "zabbix-server-mysql zabbix-server-mysql/purge   boolean false" | debconf-set-selections  
+#echo "zabbix-server-mysql zabbix-server-mysql/internal/reconfiguring  boolean false" | debconf-set-selections  
+echo "zabbix-server-mysql zabbix-server-mysql/install-error   select  abort" | debconf-set-selections  
+echo "zabbix-server-mysql zabbix-server-mysql/passwords-do-not-match  error" | debconf-set-selections > /dev/null 2>&1   
+#echo "zabbix-server-mysql zabbix-server-mysql/dbconfig-install    boolean true" | debconf-set-selections  
+echo "zabbix-server-mysql zabbix-server-mysql/mysql/method    select  unix socket" | debconf-set-selections  
+#echo "zabbix-server-mysql zabbix-server-mysql/dbconfig-upgrade    boolean true" | debconf-set-selections  
+
+dpkg-reconfigure -fnoninteractive zabbix-server-mysql
+
+cat << EOF > /etc/zabbix/apache.conf
+# Define /zabbix alias, this is the default
+<IfModule mod_alias.c>
+    Alias /zabbix /usr/share/zabbix
+</IfModule>
+
+<Directory "/usr/share/zabbix">
+    Options FollowSymLinks
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+
+    php_value max_execution_time 300
+    php_value memory_limit 128M
+    php_value post_max_size 16M
+    php_value upload_max_filesize 2M
+    php_value max_input_time 300
+    php_value date.timezone `cat /etc/timezone`
+</Directory>
+
+<Directory "/usr/share/zabbix/conf">
+    Order deny,allow
+    Deny from all
+    <files *.php>
+        Order deny,allow
+        Deny from all
+    </files>
+</Directory>
+
+<Directory "/usr/share/zabbix/api">
+    Order deny,allow
+    Deny from all
+    <files *.php>
+        Order deny,allow
+        Deny from all
+    </files>
+</Directory>
+
+<Directory "/usr/share/zabbix/include">
+    Order deny,allow
+    Deny from all
+    <files *.php>
+        Order deny,allow
+        Deny from all
+    </files>
+</Directory>
+
+<Directory "/usr/share/zabbix/include/classes">
+    Order deny,allow
+    Deny from all
+    <files *.php>
+        Order deny,allow
+        Deny from all
+    </files>
+</Directory>
+EOF
+
+service apache2 restart
+
+# Prepare DB
+NAME=`grep --only-matching --perl-regex "(?<=DBName\=).*" /etc/zabbix/zabbix_server.conf`
+USER=`grep --only-matching --perl-regex "(?<=DBUser\=).*" /etc/zabbix/zabbix_server.conf`
+PASS=`grep --only-matching --perl-regex "(?<=DBPassword\=).*" /etc/zabbix/zabbix_server.conf`
+
+cat << EOF > /usr/share/zabbix/conf/zabbix.conf.php
+<?php
+// Zabbix GUI configuration file
+global \$DB;
+
+\$DB['TYPE']     = 'MYSQL';
+\$DB['SERVER']   = 'localhost';
+\$DB['PORT']     = '0';
+\$DB['DATABASE'] = '$NAME';
+\$DB['USER']     = '$USER';
+\$DB['PASSWORD'] = '$PASS';
+
+// SCHEMA is relevant only for IBM_DB2 database
+\$DB['SCHEMA'] = '';
+
+\$ZBX_SERVER      = 'localhost';
+\$ZBX_SERVER_PORT = '10051';
+\$ZBX_SERVER_NAME = '';
+
+\$IMAGE_FORMAT_DEFAULT = IMAGE_FORMAT_PNG;
+?>
+EOF
+
+LRSIP=$(univention-config-registry get interfaces/eth0/address)
+
+#FIXME => only /24 here !!!
+RANGE=$(echo $LRSIP | sed 's/\([[:alnum:]]*.[[:alnum:]]*.[[:alnum:]]*.\).*/\11-255/')
+
+mysql -u$USER -p$PASS --database=$NAME << EOF
+UPDATE drules SET status="0" WHERE druleid="2";
+UPDATE hosts SET status="0" WHERE hostid="10084";
+UPDATE actions SET status="0" WHERE actionid="3";
+UPDATE actions SET status="0" WHERE actionid="2";
+UPDATE drules SET iprange="$RANGE" WHERE druleid="2";
+UPDATE triggers SET status="1" WHERE triggerid="13083";
+INSERT INTO groups (groupid, name, internal) VALUES
+("6", 'Windows', 0),
+( "7", 'Apple', 0),
+( "8", 'Device', 0);
+INSERT INTO actions (actionid, name, eventsource, evaltype, status, esc_period, def_shortdata, def_longdata, recovery_msg, r_shortdata, r_longdata) VALUES
+(4, 'Auto discovery. Windows servers.', 1, 0, 0, 0, 'Discovery: {DISCOVERY.DEVICE.STATUS} {DISCOVERY.DEVICE.IPADDRESS}', 'Discovery rule: {DISCOVERY.RULE.NAME}\r\n\r\nDevice IP:{DISCOVERY.DEVICE.IPADDRESS}\r\nDevice DNS: {DISCOVERY.DEVICE.DNS}\r\nDevice status: {DISCOVERY.DEVICE.STATUS}\r\nDevice uptime: {DISCOVERY.DEVICE.UPTIME}\r\n\r\nDevice service name: {DISCOVERY.SERVICE.NAME}\r\nDevice service port: {DISCOVERY.SERVICE.PORT}\r\nDevice service status: {DISCOVERY.SERVICE.STATUS}\r\nDevice service uptime: {DISCOVERY.SERVICE.UPTIME}', 0, '', ''),
+(5, 'Auto discovery. Mac servers.', 1, 0, 0, 0, 'Discovery: {DISCOVERY.DEVICE.STATUS} {DISCOVERY.DEVICE.IPADDRESS}', 'Discovery rule: {DISCOVERY.RULE.NAME}\r\n\r\nDevice IP:{DISCOVERY.DEVICE.IPADDRESS}\r\nDevice DNS: {DISCOVERY.DEVICE.DNS}\r\nDevice status: {DISCOVERY.DEVICE.STATUS}\r\nDevice uptime: {DISCOVERY.DEVICE.UPTIME}\r\n\r\nDevice service name: {DISCOVERY.SERVICE.NAME}\r\nDevice service port: {DISCOVERY.SERVICE.PORT}\r\nDevice service status: {DISCOVERY.SERVICE.STATUS}\r\nDevice service uptime: {DISCOVERY.SERVICE.UPTIME}', 0, '', '');
+INSERT INTO conditions (conditionid, actionid, conditiontype, operator, value) VALUES
+(7, 4, 12, 0, 'windows'),
+(8, 4, 10, 0, '0'),
+(9, 4, 8, 0, '9'),
+(10, 5, 12, 0, 'apple'),
+(11, 5, 10, 0, '0'),
+(12, 5, 8, 0, '9');
+INSERT INTO operations (operationid, actionid, operationtype, esc_period, esc_step_from, esc_step_to, evaltype) VALUES
+(4, 2, 2, 0, 1, 1, 0),
+(5, 5, 2, 0, 1, 1, 0),
+(6, 5, 4, 0, 1, 1, 0),
+(7, 5, 6, 0, 1, 1, 0),
+(8, 4, 2, 0, 1, 1, 0),
+(9, 4, 4, 0, 1, 1, 0),
+(10, 4, 6, 0, 1, 1, 0);
+INSERT INTO optemplate (optemplateid, operationid, templateid) VALUES
+(2, 7, 10050),
+(3, 7, 10079),
+(4, 10, 10050),
+(5, 10, 10081);
+INSERT INTO opgroup (opgroupid, operationid, groupid) VALUES
+(2, 6, 7),
+(3, 9, 6);
+INSERT INTO dchecks (dcheckid, druleid, type, key_, snmp_community, ports, snmpv3_securityname, snmpv3_securitylevel, snmpv3_authpassphrase, snmpv3_privpassphrase, uniq) VALUES
+(3, 2, 12, '', '', '0', '', 0, '', '', 0);
+INSERT INTO rights (rightid, groupid, permission, id) VALUES
+(15, 8, 2, 7),
+(16, 8, 2, 8),
+(17, 8, 2, 5),
+(18, 8, 2, 2),
+(19, 8, 2, 1),
+(20, 8, 2, 6),
+(21, 8, 2, 4);
+EOF

@@ -5,7 +5,7 @@ SCRIPT_DIR=${1}
 ROOT_PASSWD=`cat /etc/mysql.secret`
 LDAP_ROOT_PASSWD=`cat /etc/mandriva.secret`
 BASEDN=`ucr get ldap/base`
-GLPIKEY=`grep -rn define /usr/share/glpi/ | grep GLPIKEY | cut -d'"' -f4`
+GLPIKEY=`grep -rn define /usr/share/glpi/* | grep GLPIKEY | cut -d'"' -f4`
 ENCRYPTEDGLPIKEY=`php ${SCRIPT_DIR}/addons/get_encrypted_glpikey.php ${LDAP_ROOT_PASSWD} ${GLPIKEY}`
 
 echo "UPDATE glpi_authldaps SET rootdn_passwd = '${ENCRYPTEDGLPIKEY}';" | mysql -uroot glpi -p${ROOT_PASSWD}

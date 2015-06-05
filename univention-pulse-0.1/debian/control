@@ -20,5 +20,8 @@ Depends: curl (>= 7.21), nsis(>= 2.46), python-sqlalchemy (>= 0.7.2),
 	glpi, fusioninventory-for-glpi, glpi-webservices, glpi-manufacturersimports,
 	python-mmc-glpi, mmc-web-glpi,
 	patch, sudo, pwgen,
+	zabbix-agent, zabbix-frontend-php, zabbix-server-mysql,
+	python-pulse2-common-database-monitoring, python-mmc-monitoring, mmc-web-monitoring,
+	python-netaddr, createrepo
 	${misc:Depends}
 Description: Mandriva Pulse meta-package for Univention
